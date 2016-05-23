@@ -41,6 +41,7 @@ var (
 	valueFalse = reflect.ValueOf(false)
 )
 
+// UnmarshalMap unmarshal map[string]interface{} to a struct instance
 func UnmarshalMap(dest, src interface{}) error {
 	return unmarshal(rvalue(dest), reflect.ValueOf(src))
 }
@@ -117,11 +118,11 @@ func unmarshalInt(dest, src reflect.Value) error {
 		case srcKind == reflect.Float32 || srcKind == reflect.Float64:
 			dest.SetInt(int64(src.Float()))
 		case srcKind == reflect.String:
-			if intValue, err := parseIntText(src.String()); err != nil {
+			intValue, err := parseIntText(src.String())
+			if err != nil {
 				return err
-			} else {
-				dest.SetInt(intValue)
 			}
+			dest.SetInt(intValue)
 		default:
 			return badtype("int/string", src)
 		}
@@ -134,11 +135,11 @@ func unmarshalInt(dest, src reflect.Value) error {
 		case srcKind == reflect.Float32 || srcKind == reflect.Float64:
 			dest.SetUint(uint64(src.Float()))
 		case srcKind == reflect.String:
-			if intValue, err := parseUintText(src.String()); err != nil {
+			intValue, err := parseUintText(src.String())
+			if err != nil {
 				return err
-			} else {
-				dest.SetUint(uint64(intValue))
 			}
+			dest.SetUint(uint64(intValue))
 		default:
 			return badtype("int/string", src)
 		}
@@ -160,17 +161,16 @@ func unmarshalFloat(dest, src reflect.Value) error {
 		if text == "NaN" {
 			dest.SetFloat(math.NaN())
 		} else if percentageFloatPattern.MatchString(text) {
-			if floatValue, err := strconv.ParseFloat(text[:len(text)-1], 64); err != nil {
+			floatValue, err := strconv.ParseFloat(text[:len(text)-1], 64)
+			if err != nil {
 				return err
-			} else {
-				dest.SetFloat(floatValue / 100)
 			}
+			dest.SetFloat(floatValue / 100)
 		} else {
 			if floatValue, err := strconv.ParseFloat(text, 64); err != nil {
 				return err
-			} else {
-				dest.SetFloat(floatValue)
 			}
+			dest.SetFloat(floatValue)
 		}
 	default:
 		return badtype("int/float/string", src)
@@ -423,6 +423,6 @@ func indirect(value reflect.Value) reflect.Value {
 }
 
 func badtype(expected string, value reflect.Value) error {
-	return fmt.Errorf("expect %s but found %q(%s).",
+	return fmt.Errorf("expect %s but found %q(%s)",
 		expected, value.Type().Name(), value.Kind())
 }

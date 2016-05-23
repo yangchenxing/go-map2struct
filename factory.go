@@ -5,8 +5,13 @@ import (
 	"reflect"
 )
 
+// Factory represents a instance factory used in unmarshaling.
 type Factory interface {
+	// GetInstanceType returns the type of the instance create by this factory.
+	// The instance type is used to index the factory.
 	GetInstanceType() reflect.Type
+
+	// Create returns the new instance.
 	Create(map[string]interface{}) (interface{}, error)
 }
 
@@ -14,12 +19,14 @@ var (
 	factories = make(map[string]Factory)
 )
 
+// RegisterFactory register factories.
 func RegisterFactory(factory Factory) {
 	if factory != nil {
 		factories[getTypeName(factory.GetInstanceType())] = factory
 	}
 }
 
+// CreateByFactory create a instance of specified type.
 func CreateByFactory(typ reflect.Type, data map[string]interface{}) (interface{}, error) {
 	typeName := getTypeName(typ)
 	if factory := factories[typeName]; factory != nil {
@@ -31,11 +38,13 @@ func CreateByFactory(typ reflect.Type, data map[string]interface{}) (interface{}
 func getTypeName(typ reflect.Type) string {
 	if pkg := typ.PkgPath(); pkg != "" {
 		return pkg + "." + typ.Name()
-	} else {
-		return typ.Name()
 	}
+	return typ.Name()
 }
 
+// GeneralInterfaceFactory provides a general factory for interface.
+// For creating instance, the input map need a key to specified the type implelement the interface.
+// The factory new a instance with the type associated the type key, and unmarshal the map to the instance struct.
 type GeneralInterfaceFactory struct {
 	interfaceType reflect.Type
 	typeKey       string
@@ -43,6 +52,7 @@ type GeneralInterfaceFactory struct {
 	initializer   func(interface{}) error
 }
 
+// NewGeneralInterfaceFactory creates a GeneralInterfaceFactory instance.
 func NewGeneralInterfaceFactory(interfaceType reflect.Type, typeKey string, initializer func(interface{}) error) *GeneralInterfaceFactory {
 	return &GeneralInterfaceFactory{
 		interfaceType: interfaceType,
@@ -52,14 +62,17 @@ func NewGeneralInterfaceFactory(interfaceType reflect.Type, typeKey string, init
 	}
 }
 
+// RegisterType register new type and its associated key.
 func (factory *GeneralInterfaceFactory) RegisterType(name string, instanceType reflect.Type) {
 	factory.types[name] = instanceType
 }
 
+// GetInstanceType returns the interface type.
 func (factory *GeneralInterfaceFactory) GetInstanceType() reflect.Type {
 	return factory.interfaceType
 }
 
+// Create creates a new instance implement the interface.
 func (factory *GeneralInterfaceFactory) Create(data map[string]interface{}) (interface{}, error) {
 	var instance interface{}
 	if typeName, ok := data[factory.typeKey].(string); !ok || typeName == "" {
