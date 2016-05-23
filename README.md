@@ -1,5 +1,8 @@
 # go-map2struct
 
+[![Build Status](https://travis-ci.org/yangchenxing/go-map2struct.svg?branch=master)](https://travis-ci.org/yangchenxing/go-map2struct)
+[![GoDoc](http://godoc.org/github.com/yangchenxing/go-map2struct?status.svg)](http://godoc.org/github.com/yangchenxing/go-map2struct)
+
 go-map2struct convert map[string]interface{} to struct.
 
 ## Example
