@@ -36,12 +36,12 @@ func TestUnmarshalMap(t *testing.T) {
 		"BoolA":     false,
 		"BoolB":     "true",
 		"DurationA": "1h",
-		"TimeA":     now.Format("2006-01-02:15:04:05"),
+		"TimeA":     now.Format("2006-01-02:15:04:05-0700"),
 		"EmbedA": map[string]interface{}{
 			"I": "99",
 		},
 	}
-	t.Log(src)
+	// t.Log(src)
 	expect := TestTypeA{
 		IntA:      1,
 		IntB:      2,
@@ -60,10 +60,16 @@ func TestUnmarshalMap(t *testing.T) {
 	var actual TestTypeA
 	if err := UnmarshalMap(&actual, src); err != nil {
 		t.Errorf("unmarshal map fail: %s\n", err.Error())
+		return
 	}
-	if actual.IntA != 1 || actual.IntB != 2 || actual.IntC != 3 || actual.IntHex != 0x0fffffff || actual.IntOct != 0755 ||
-		actual.FloatA != 1.0 || actual.BoolA != false || actual.BoolB != true {
+	// if !actual.TimeA.Equal(expect.TimeA) {
+	// 	t.Errorf("TimeA mismatch: expected=%s, actual=%s", expect.TimeA, actual.TimeA)
+	// }
+	// expect.TimeA = time.Time{}
+	// actual.TimeA = time.Time{}
+	if actual != expect {
 		t.Errorf("unmarshal result fail: expect=%s, actual=%s\n", jsonify(expect), jsonify(actual))
+		return
 	}
 }
 

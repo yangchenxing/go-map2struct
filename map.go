@@ -4,7 +4,6 @@ import (
 	"encoding"
 	"fmt"
 	"math"
-	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -41,33 +40,6 @@ var (
 	valueTrue  = reflect.ValueOf(true)
 	valueFalse = reflect.ValueOf(false)
 )
-
-func LoadMap(path string, loader func(string) (map[string]interface{}, error), includeKey string) (map[string]interface{}, error) {
-	data, err := loader(path)
-	if err != nil {
-		return nil, fmt.Errorf("load map from %q fail: %s", path, err.Error())
-	}
-	includes := data[includeKey]
-	if includes, ok := includes.([]interface{}); ok {
-		for _, include := range includes {
-			if include, ok := include.(string); ok {
-				subData, err := func() (map[string]interface{}, error) {
-					if filepath.IsAbs(include) {
-						return LoadMap(include, loader, includeKey)
-					}
-					return LoadMap(filepath.Join(filepath.Dir(path), include), loader, includeKey)
-				}()
-				if err == nil {
-					for key, value := range subData {
-						data[key] = value
-					}
-				}
-			}
-		}
-		delete(data, includeKey)
-	}
-	return data, nil
-}
 
 func UnmarshalMap(dest, src interface{}) error {
 	return unmarshal(rvalue(dest), reflect.ValueOf(src))
