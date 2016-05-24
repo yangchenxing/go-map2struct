@@ -167,7 +167,8 @@ func unmarshalFloat(dest, src reflect.Value) error {
 			}
 			dest.SetFloat(floatValue / 100)
 		} else {
-			if floatValue, err := strconv.ParseFloat(text, 64); err != nil {
+			floatValue, err := strconv.ParseFloat(text, 64)
+			if err != nil {
 				return err
 			}
 			dest.SetFloat(floatValue)
