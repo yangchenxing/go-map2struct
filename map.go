@@ -183,7 +183,7 @@ func unmarshalArray(dest, src reflect.Value) error {
 	srcKind := src.Kind()
 	if srcKind != reflect.Slice && srcKind != reflect.Array {
 		return badtype("array/slice", src)
-	} else if dest.IsNil() || src.Len() != dest.Len() {
+	} else if src.Len() != dest.Len() {
 		return fmt.Errorf("array length mismatch: %d vs. %d", src.Len(), dest.Len())
 	}
 	return copySlice(dest, src)

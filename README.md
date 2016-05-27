@@ -1,7 +1,9 @@
 # go-map2struct
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/yangchenxing/go-map2struct)](https://goreportcard.com/report/github.com/yangchenxing/go-map2struct)
 [![Build Status](https://travis-ci.org/yangchenxing/go-map2struct.svg?branch=master)](https://travis-ci.org/yangchenxing/go-map2struct)
 [![GoDoc](http://godoc.org/github.com/yangchenxing/go-map2struct?status.svg)](http://godoc.org/github.com/yangchenxing/go-map2struct)
+[![Coverage Status](https://coveralls.io/repos/github/yangchenxing/go-map2struct/badge.svg?branch=master)](https://coveralls.io/github/yangchenxing/go-map2struct?branch=master)
 
 go-map2struct convert map[string]interface{} to struct.
 
