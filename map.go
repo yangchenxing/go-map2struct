@@ -41,8 +41,8 @@ var (
 	valueFalse = reflect.ValueOf(false)
 )
 
-// UnmarshalMap unmarshal map[string]interface{} to a struct instance
-func UnmarshalMap(dest, src interface{}) error {
+// Unmarshal unmarshal map[string]interface{} to a struct instance
+func Unmarshal(dest, src interface{}) error {
 	return unmarshal(rvalue(dest), reflect.ValueOf(src))
 }
 
@@ -158,13 +158,14 @@ func unmarshalFloat(dest, src reflect.Value) error {
 		dest.SetFloat(src.Float())
 	case srcKind == reflect.String:
 		text := src.String()
-		if text == "NaN" {
+		if text == "Inf" || text == "+Inf" {
+			dest.SetFloat(math.Inf(1))
+		} else if text == "-Inf" {
+			dest.SetFloat(math.Inf(-1))
+		} else if text == "NaN" {
 			dest.SetFloat(math.NaN())
 		} else if percentageFloatPattern.MatchString(text) {
-			floatValue, err := strconv.ParseFloat(text[:len(text)-1], 64)
-			if err != nil {
-				return err
-			}
+			floatValue, _ := strconv.ParseFloat(text[:len(text)-1], 64)
 			dest.SetFloat(floatValue / 100)
 		} else {
 			floatValue, err := strconv.ParseFloat(text, 64)
@@ -190,21 +191,22 @@ func unmarshalArray(dest, src reflect.Value) error {
 }
 
 func unmarshalInterface(dest, src reflect.Value) error {
-	// 当出现无效值或者nil时，将目标复制为nil
-	switch src.Kind() {
-	case reflect.Interface, reflect.Chan, reflect.Map, reflect.Slice, reflect.Ptr:
-		if !src.IsValid() || src.IsNil() {
-			dest.Set(reflect.Zero(dest.Type()))
-			return nil
-		}
-	case reflect.Invalid:
-		dest.Set(reflect.Zero(dest.Type()))
-		return nil
-	}
+	// interface{}
 	if dest.Type().NumMethod() == 0 {
 		dest.Set(src)
 		return nil
 	}
+	// nil
+	if !src.IsValid() {
+		dest.Set(reflect.Zero(dest.Type()))
+		return nil
+	}
+	// 其他直接赋值情况
+	if dest.Type() == src.Type() || src.Type().Implements(dest.Type()) {
+		dest.Set(src)
+		return nil
+	}
+	// 非直接赋值情况
 	if data, ok := src.Interface().(map[string]interface{}); !ok {
 		return badtype("map[string]interface{}", src)
 	} else if instance, err := CreateByFactory(dest.Type(), data); err != nil {
@@ -323,9 +325,10 @@ func unmarshalStruct(dest, src reflect.Value) error {
 }
 
 func unmarshalPtr(dest, src reflect.Value) error {
-	if dest.IsNil() {
-		dest.Set(reflect.New(dest.Type().Elem()))
-	}
+	// always non-nil
+	// if dest.IsNil() {
+	// 	dest.Set(reflect.New(dest.Type().Elem()))
+	// }
 	return unmarshal(reflect.Indirect(dest), src)
 }
 
@@ -375,10 +378,10 @@ func unmarshalDuration(dest, src reflect.Value) error {
 func parseIntText(text string) (int64, error) {
 	if text == "0" {
 		return 0, nil
-	} else if strings.HasPrefix(text, "0") {
-		return strconv.ParseInt(text[1:], 8, 64)
 	} else if strings.HasPrefix(text, "0x") {
 		return strconv.ParseInt(text[2:], 16, 64)
+	} else if strings.HasPrefix(text, "0") {
+		return strconv.ParseInt(text[1:], 8, 64)
 	}
 	return strconv.ParseInt(text, 10, 64)
 }

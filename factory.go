@@ -21,9 +21,7 @@ var (
 
 // RegisterFactory register factories.
 func RegisterFactory(factory Factory) {
-	if factory != nil {
-		factories[getTypeName(factory.GetInstanceType())] = factory
-	}
+	factories[getTypeName(factory.GetInstanceType())] = factory
 }
 
 // CreateByFactory create a instance of specified type.
@@ -84,7 +82,7 @@ func (factory *GeneralInterfaceFactory) Create(data map[string]interface{}) (int
 	} else {
 		instance = reflect.New(instanceType).Interface()
 	}
-	if err := UnmarshalMap(instance, data); err != nil {
+	if err := Unmarshal(instance, data); err != nil {
 		return nil, fmt.Errorf("unmarshal map fail: %s", err.Error())
 	}
 	if factory.initializer != nil {
