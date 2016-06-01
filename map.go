@@ -209,7 +209,7 @@ func unmarshalInterface(dest, src reflect.Value) error {
 	// 非直接赋值情况
 	if data, ok := src.Interface().(map[string]interface{}); !ok {
 		return badtype("map[string]interface{}", src)
-	} else if instance, err := CreateByFactory(dest.Type(), data); err != nil {
+	} else if instance, err := createByFactory(dest.Type(), data); err != nil {
 		return err
 	} else {
 		dest.Set(reflect.ValueOf(instance))

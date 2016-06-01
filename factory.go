@@ -24,8 +24,7 @@ func RegisterFactory(factory Factory) {
 	factories[getTypeName(factory.GetInstanceType())] = factory
 }
 
-// CreateByFactory create a instance of specified type.
-func CreateByFactory(typ reflect.Type, data map[string]interface{}) (interface{}, error) {
+func createByFactory(typ reflect.Type, data map[string]interface{}) (interface{}, error) {
 	typeName := getTypeName(typ)
 	if factory := factories[typeName]; factory != nil {
 		return factory.Create(data)
