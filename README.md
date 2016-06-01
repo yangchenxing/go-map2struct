@@ -13,7 +13,7 @@ go-map2struct convert map[string]interface{} to struct.
       IntA      int
       IntB      uint32
       IntC      int64
-	    IntHex    uint32
+      IntHex    uint32
       IntOct    uint16
       FloatA    float32
       BoolA     bool
