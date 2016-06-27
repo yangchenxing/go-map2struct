@@ -56,6 +56,7 @@ func TestGeneralInterfaceFactory(t *testing.T) {
 		"type", initializeInstance)
 	factory.RegisterType("Foo", reflect.TypeOf((*foo)(nil)).Elem())
 	factory.RegisterType("Bar", reflect.TypeOf((*bar)(nil)).Elem())
+	factory.RegisterInstance("Instance", &foo{Text: "instance"})
 	RegisterFactory(factory)
 	src := map[string]interface{}{
 		"Stringer1": map[string]interface{}{
@@ -66,10 +67,14 @@ func TestGeneralInterfaceFactory(t *testing.T) {
 			"type":     "Bar",
 			"Duration": "1s",
 		},
+		"Instance": map[string]interface{}{
+			"type": "Instance",
+		},
 	}
 	type TestStruct struct {
 		Stringer1 stringer
 		Stringer2 stringer
+		Instance  stringer
 	}
 	type TestStruct2 struct {
 		Texter texter
@@ -79,7 +84,7 @@ func TestGeneralInterfaceFactory(t *testing.T) {
 		t.Error("unmarshal map fail:", err.Error())
 		return
 	}
-	if output.Stringer1.String() != "foo:hello" || output.Stringer2.String() != "bar:1s" {
+	if output.Stringer1.String() != "foo:hello" || output.Stringer2.String() != "bar:1s" || output.Instance.String() != "foo:instance" {
 		t.Error("unexpected output:", output)
 		return
 	}

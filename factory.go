@@ -46,6 +46,7 @@ type GeneralInterfaceFactory struct {
 	interfaceType reflect.Type
 	typeKey       string
 	types         map[string]reflect.Type
+	instances     map[string]interface{}
 	initializer   func(interface{}) error
 }
 
@@ -55,6 +56,7 @@ func NewGeneralInterfaceFactory(interfaceType reflect.Type, typeKey string, init
 		interfaceType: interfaceType,
 		typeKey:       typeKey,
 		types:         make(map[string]reflect.Type),
+		instances:     make(map[string]interface{}),
 		initializer:   initializer,
 	}
 }
@@ -62,6 +64,11 @@ func NewGeneralInterfaceFactory(interfaceType reflect.Type, typeKey string, init
 // RegisterType register new type and its associated key.
 func (factory *GeneralInterfaceFactory) RegisterType(name string, instanceType reflect.Type) {
 	factory.types[name] = instanceType
+}
+
+// RegisterInstance register new instance and its associated key.
+func (factory *GeneralInterfaceFactory) RegisterInstance(name string, instance interface{}) {
+	factory.instances[name] = instance
 }
 
 // GetInstanceType returns the interface type.
@@ -74,6 +81,8 @@ func (factory *GeneralInterfaceFactory) Create(data map[string]interface{}) (int
 	var instance interface{}
 	if typeName, ok := data[factory.typeKey].(string); !ok || typeName == "" {
 		return nil, fmt.Errorf("missing type key: key=%q, map=%v", factory.typeKey, data)
+	} else if registeredInstance, found := factory.instances[typeName]; found {
+		return registeredInstance, nil
 	} else if instanceType, found := factory.types[typeName]; !found {
 		return nil, fmt.Errorf("unknown type: %q", typeName)
 	} else if instanceType.Kind() == reflect.Ptr {
